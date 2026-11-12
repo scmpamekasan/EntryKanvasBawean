@@ -386,17 +386,14 @@ if st.session_state["form_preview_data"] is None:
       tanggal_entry = st.date_input("Date", value=datetime.now(TZ_WIB).date())
       promotor_entry = st.selectbox("Nama Promotor", list(PROMOTOR_ZONA.keys()))
       brand_entry = st.selectbox("Brand", DAFTAR_BRAND)
-      omset_entry = st.number_input(
-          "Omset (bungkus)", min_value=0, step=1, value=0
-      )
     with col2:
       zona_otomatis = PROMOTOR_ZONA.get(promotor_entry, "-")
       st.text_input("Zona (Otomatis)", value=zona_otomatis, disabled=True)
       canvas_plan_entry = st.number_input(
           "Canvas Plan", min_value=0, step=1, value=0
       )
-      jumlah_setoran_entry = st.number_input(
-          "Jumlah Setoran (Rp)", min_value=0, step=500, value=0
+      omset_entry = st.number_input(
+          "Omset (bungkus)", min_value=0, step=1, value=0
       )
 
     st.markdown("---")
@@ -450,6 +447,12 @@ if st.session_state["form_preview_data"] is None:
       )
 
     direct_selling = st.number_input("Direct Selling", min_value=0, step=1, value=0)
+
+    # Posisi input Jumlah Setoran (Rp) ditempatkan setelah bagian Promsus & Direct Selling
+    st.markdown("---")
+    jumlah_setoran_entry = st.number_input(
+        "Jumlah Setoran (Rp)", min_value=0, step=500, value=0
+    )
 
     st.markdown("---")
     btn_col1, btn_col2 = st.columns(2)
@@ -635,12 +638,6 @@ else:
               else 0
           )
           e_brand = st.selectbox("Brand", DAFTAR_BRAND, index=idx_brand)
-          e_omset = st.number_input(
-              "Omset (bungkus)",
-              min_value=0,
-              step=1,
-              value=int(row_edit["Omset (Bungkus)"]),
-          )
         with e_col2:
           e_zona_otomatis = PROMOTOR_ZONA.get(e_promotor, "-")
           st.text_input("Zona (Otomatis)", value=e_zona_otomatis, disabled=True)
@@ -650,16 +647,11 @@ else:
               step=1,
               value=int(row_edit["Canvas Plan"]),
           )
-          val_setoran_edit = (
-              int(row_edit["Jumlah Setoran (Rp)"])
-              if "Jumlah Setoran (Rp)" in row_edit and pd.notnull(row_edit["Jumlah Setoran (Rp)"])
-              else 0
-          )
-          e_jumlah_setoran = st.number_input(
-              "Jumlah Setoran (Rp)",
+          e_omset = st.number_input(
+              "Omset (bungkus)",
               min_value=0,
-              step=500,
-              value=val_setoran_edit,
+              step=1,
+              value=int(row_edit["Omset (Bungkus)"]),
           )
 
         st.markdown("##### Rincian Outlet")
@@ -752,6 +744,18 @@ else:
             min_value=0,
             step=1,
             value=int(row_edit["Direct Selling"]),
+        )
+
+        val_setoran_edit = (
+            int(row_edit["Jumlah Setoran (Rp)"])
+            if "Jumlah Setoran (Rp)" in row_edit and pd.notnull(row_edit["Jumlah Setoran (Rp)"])
+            else 0
+        )
+        e_jumlah_setoran = st.number_input(
+            "Jumlah Setoran (Rp)",
+            min_value=0,
+            step=500,
+            value=val_setoran_edit,
         )
 
         btn_update = st.form_submit_button("💾 Perbarui Data", type="primary")
