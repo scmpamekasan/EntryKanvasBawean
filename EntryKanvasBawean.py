@@ -29,41 +29,8 @@ hari_ini = waktu_sekarang.strftime("%Y-%m-%d")
 
 # Mapping Daftar Promotor dan Zona
 PROMOTOR_ZONA = {
-    "Achmad Danu Ardi": "Bubutan",
-    "Arik Wibisono": "Bubutan",
-    "Arum Ganda Fajar Ria": "Bubutan",
-    "Candra Budi Eka": "Bubutan",
-    "Rofi Wijayanto": "Bubutan",
-    "Angga Budi Setiawan": "Gresik Selatan",
-    "Dhimas Prayoga": "Gresik Selatan",
-    "Hendra": "Gresik Selatan",
-    "Rusdianto": "Gresik Selatan",
-    "Septian Chandra": "Gresik Selatan",
-    "Surya Hadi Pratama": "Gresik Selatan",
-    "Alfianto Nur Huda": "Gresik Selatan",
-    "Heru Setiawan": "Gresik Selatan",
-    "Pisga Andriyanto": "Gresik Selatan",
-    "Muhammad Rizky Pratama Putra": "Gresik Selatan",
-    "Aldi Dwi Prasetyo": "Gresik Utara",
-    "Budi Setyawan": "Gresik Utara",
-    "Dwi Nor Fais": "Gresik Utara",
-    "Khoirur Rijal": "Gresik Utara",
-    "Lurico Umar Raffsanjani": "Gresik Utara",
-    "Rahmad Dani": "Gresik Utara",
-    "M Holidi": "Gresik Utara",
-    "Daniel Arief Kurniawan": "Karangpilang",
-    "Dimas Rizky Dermawan": "Karangpilang",
-    "Guntur Vicki Prasetyo": "Karangpilang",
-    "Zayd Abigail Johansyah": "Karangpilang",
-    "Axel Setiawan": "Sawahan",
-    "Delpiero Kevin Santoso": "Sawahan",
-    "Muhamad Baharudin Yusuf": "Sawahan",
-    "Muhammad Luthfi Anshori": "Sawahan",
-    "Rendi Wahyudi": "Sawahan",
-    "Arik Setiawan": "Tandes",
-    "Syarif Usman Fadholi": "Tandes",
-    "Surya Wisnu Wibisono": "Tandes",
-    "Eko Sucipto": "Tandes",
+    "Arif Yuliadi": "Bawean",
+    "Nur Muhammad Khoirul Firmansyah": "Bawean",
 }
 
 # Konfigurasi Halaman Streamlit
@@ -201,82 +168,6 @@ def muat_data():
   return df
 
 
-def buat_gambar_rekap(df, judul):
-  """Membuat gambar tabel rekapitulasi untuk diunduh (PNG/JPEG).
-
-  Teks "DSO" & "SURABAYA BARAT" (2 baris, tebal, ukuran besar) di sebelah kiri
-  logo.
-  """
-  has_logo = os.path.exists("76aksara.png")
-
-  fig_height = 20.0 if has_logo else 18.5
-  fig = plt.figure(figsize=(18, fig_height), facecolor="white")
-
-  # ===== 1. JUDUL (Di bagian paling atas, rata tengah) =====
-  ax_title = fig.add_axes([0.0, 0.945, 1.0, 0.040])
-  ax_title.axis("off")
-  ax_title.text(
-      0.5,
-      0.5,
-      judul,
-      ha="center",
-      va="center",
-      fontsize=32,
-      fontweight="bold",
-      color="#0f172a",
-      fontfamily="sans-serif",
-  )
-
-  # ===== 2. HEADER ATAS: TEKS 2 BARIS DI KIRI & LOGO DI KANAN =====
-  if has_logo:
-    # Area teks di sebelah kiri (left=0.02, width=0.30)
-    ax_text = fig.add_axes([0.02, 0.840, 0.30, 0.095])
-    ax_text.axis("off")
-    # Menggunakan \n untuk membuat 2 baris dengan ukuran font besar & bold
-    ax_text.text(
-        0.0,
-        0.5,
-        "DSO\nSURABAYA BARAT",
-        ha="center",
-        va="center",
-        fontsize=35,
-        fontweight="bold",
-        color="#FFFFFF",
-        fontfamily="sans-serif",
-        linespacing=1.4,
-        bbox=dict(
-            boxstyle="round,pad=0.5",  # Kotak dengan sudut melengkung halus
-            facecolor="#000000",  # Warna latar belakang dalam kotak (abu-abu terang)
-            edgecolor="#FFFFFF",  # Warna garis border/bingkai (abu-abu gelap)
-            linewidth=2.0,  # Ketebalan garis border
-        ),
-    )
-
-    # Area logo 76aksara.png di sebelah kanan (left=0.2, width=0.8)
-    ax_logo = fig.add_axes([0.2, 0.840, 0.8, 0.095])
-    ax_logo.axis("off")
-    try:
-      logo_img = PILImage.open("76aksara.png")
-      ax_logo.imshow(logo_img, aspect="auto")
-      ax_logo.set_xlim(0, logo_img.width)
-      ax_logo.set_ylim(logo_img.height, 0)
-    except Exception:
-      ax_logo.text(
-          0.5,
-          0.5,
-          "Logo 76aksara.png",
-          ha="center",
-          va="center",
-          fontsize=13,
-          color="#64748b",
-      )
-
-    table_bottom = 0.02
-    table_height = 0.800
-  else:
-    table_bottom = 0.03
-    table_height = 0.900
-
   # ===== 3. TABEL DATA REKAP =====
   ax_table = fig.add_axes([0.02, table_bottom, 0.99, table_height])
   ax_table.axis("off")
@@ -412,7 +303,7 @@ if st.session_state["form_preview_data"] is None:
     with col1:
       tanggal_entry = st.date_input("Date", value=datetime.now(TZ_WIB).date())
       promotor_entry = st.selectbox("Nama Promotor", list(PROMOTOR_ZONA.keys()))
-      brand_entry = st.selectbox("Brand", ["Djarum 76 Aksara"])
+      brand_entry = st.selectbox("Brand", ["D.Super 12","D.76 Apel", "D.76 Apel Royal","Black Matcha K12","Black Matcha Siro","Black Matcha Kuro","Djarum 76 Aksara"])
     with col2:
       zona_otomatis = PROMOTOR_ZONA.get(promotor_entry, "-")
       st.text_input("Zona (Otomatis)", value=zona_otomatis, disabled=True)
@@ -701,7 +592,7 @@ else:
           )
 
           list_brand = [
-              "Djarum 76 Aksara",
+              "D.Super 12","D.76 Apel", "D.76 Apel Royal","Black Matcha K12","Black Matcha Siro","Black Matcha Kuro","Djarum 76 Aksara,
           ]
           idx_brand = (
               list_brand.index(row_edit["Brand"])
@@ -1173,10 +1064,6 @@ else:
           f"#### Laporan Rekapitulasi {label_zona_judul} - Minggu ke"
           f" {pilih_minggu} - {pilih_tahun}"
       )
-
-      # Logo di bawah judul, di atas tabel (lebar penuh)
-      if os.path.exists("76aksara.png"):
-        st.image("76aksara.png", use_container_width=True)
 
       st.table(df_final_rekap)
 
