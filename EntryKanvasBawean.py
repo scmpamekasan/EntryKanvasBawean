@@ -111,6 +111,7 @@ def inisialisasi_database():
             jumlah_rokok_sampling INTEGER,
             jumlah_konsumen_trial INTEGER,
             direct_selling INTEGER,
+            jumlah_setoran INTEGER,
             waktu_submit TEXT
         )
     """)
@@ -123,6 +124,8 @@ def inisialisasi_database():
     cursor.execute("ALTER TABLE kanvas RENAME COLUMN pic TO nama_promotor")
   if "zona" not in columns:
     cursor.execute("ALTER TABLE kanvas ADD COLUMN zona TEXT")
+  if "jumlah_setoran" not in columns:
+    cursor.execute("ALTER TABLE kanvas ADD COLUMN jumlah_setoran INTEGER DEFAULT 0")
 
   kolom_promsus = {
       "promsus_10_1": "INTEGER",
@@ -167,6 +170,7 @@ def muat_data():
                    jumlah_rokok_sampling AS [Jumlah Rokok Sampling],
                    jumlah_konsumen_trial AS [Jumlah Konsumen Trial],
                    direct_selling AS [Direct Selling],
+                   jumlah_setoran AS [Jumlah Setoran (Rp)],
                    waktu_submit AS [Waktu Submit]
             FROM kanvas
             ORDER BY waktu_submit DESC
@@ -333,8 +337,8 @@ def simpan_ke_database(data_preview):
             outlet_ks_b, outlet_tb_ada_a, outlet_tb_ada_p, outlet_tb_ks, 
             omset_bungkus, promsus_10_1, promsus_3_1, promsus_2_1, promsus_1_1, 
             promsus_n_mie_instan, outlet_buka_ecer, jumlah_rokok_sampling, jumlah_konsumen_trial, 
-            direct_selling, waktu_submit
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            direct_selling, jumlah_setoran, waktu_submit
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
       (
           data_preview["tanggal"],
@@ -358,6 +362,7 @@ def simpan_ke_database(data_preview):
           data_preview["jumlah_rokok_sampling"],
           data_preview["jumlah_konsumen_trial"],
           data_preview["direct_selling"],
+          data_preview["jumlah_setoran"],
           data_preview["waktu_submit"],
       ),
   )
@@ -381,14 +386,17 @@ if st.session_state["form_preview_data"] is None:
       tanggal_entry = st.date_input("Date", value=datetime.now(TZ_WIB).date())
       promotor_entry = st.selectbox("Nama Promotor", list(PROMOTOR_ZONA.keys()))
       brand_entry = st.selectbox("Brand", DAFTAR_BRAND)
+      omset_entry = st.number_input(
+          "Omset (bungkus)", min_value=0, step=1, value=0
+      )
     with col2:
       zona_otomatis = PROMOTOR_ZONA.get(promotor_entry, "-")
       st.text_input("Zona (Otomatis)", value=zona_otomatis, disabled=True)
       canvas_plan_entry = st.number_input(
           "Canvas Plan", min_value=0, step=1, value=0
       )
-      omset_entry = st.number_input(
-          "Omset (bungkus)", min_value=0, step=1, value=0
+      jumlah_setoran_entry = st.number_input(
+          "Jumlah Setoran (Rp)", min_value=0, step=500, value=0
       )
 
     st.markdown("---")
@@ -476,6 +484,7 @@ if st.session_state["form_preview_data"] is None:
             "jumlah_rokok_sampling": jml_sampling,
             "jumlah_konsumen_trial": jml_trial,
             "direct_selling": direct_selling,
+            "jumlah_setoran": jumlah_setoran_entry,
             "waktu_submit": waktu_sekarang.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
@@ -626,6 +635,12 @@ else:
               else 0
           )
           e_brand = st.selectbox("Brand", DAFTAR_BRAND, index=idx_brand)
+          e_omset = st.number_input(
+              "Omset (bungkus)",
+              min_value=0,
+              step=1,
+              value=int(row_edit["Omset (Bungkus)"]),
+          )
         with e_col2:
           e_zona_otomatis = PROMOTOR_ZONA.get(e_promotor, "-")
           st.text_input("Zona (Otomatis)", value=e_zona_otomatis, disabled=True)
@@ -635,11 +650,16 @@ else:
               step=1,
               value=int(row_edit["Canvas Plan"]),
           )
-          e_omset = st.number_input(
-              "Omset (bungkus)",
+          val_setoran_edit = (
+              int(row_edit["Jumlah Setoran (Rp)"])
+              if "Jumlah Setoran (Rp)" in row_edit and pd.notnull(row_edit["Jumlah Setoran (Rp)"])
+              else 0
+          )
+          e_jumlah_setoran = st.number_input(
+              "Jumlah Setoran (Rp)",
               min_value=0,
-              step=1,
-              value=int(row_edit["Omset (Bungkus)"]),
+              step=500,
+              value=val_setoran_edit,
           )
 
         st.markdown("##### Rincian Outlet")
@@ -752,7 +772,8 @@ else:
                                 outlet_beli_ada = ?, outlet_ks_tb = ?, outlet_ks_b = ?, outlet_tb_ada_a = ?,
                                 outlet_tb_ada_p = ?, outlet_tb_ks = ?, omset_bungkus = ?, promsus_10_1 = ?,
                                 promsus_3_1 = ?, promsus_2_1 = ?, promsus_1_1 = ?, promsus_n_mie_instan = ?,
-                                outlet_buka_ecer = ?, jumlah_rokok_sampling = ?, jumlah_konsumen_trial = ?, direct_selling = ?
+                                outlet_buka_ecer = ?, jumlah_rokok_sampling = ?, jumlah_konsumen_trial = ?, 
+                                direct_selling = ?, jumlah_setoran = ?
                             WHERE id = ?
                         """,
                 (
@@ -777,6 +798,7 @@ else:
                     e_jml_sampling,
                     e_jml_trial,
                     e_direct_selling,
+                    e_jumlah_setoran,
                     id_dipilih,
                 ),
             )
@@ -857,7 +879,7 @@ else:
     st.info("📭 Belum ada data laporan kanvas yang tercatat.")
 
   # ====================================================
-  # MODUL REKAPITULASI HARIAN & MINGGUAN (DENGAN FILTER BRAND)
+  # MODUL REKAPITULASI HARIAN & MINGGUAN
   # ====================================================
   st.markdown("---")
   st.markdown("### 📈 Rekapitulasi Harian & Mingguan (Report Table)")
@@ -866,7 +888,6 @@ else:
   if not df_rekap_data.empty:
     df_rekap_data["Tanggal_DT"] = pd.to_datetime(df_rekap_data["Tanggal"])
 
-    # Membuat 4 kolom untuk filter: Zona, Brand, Tahun, dan Minggu
     col_rk1, col_rk2, col_rk3, col_rk4 = st.columns(4)
 
     with col_rk1:
@@ -883,13 +904,11 @@ else:
           "Pilih Brand", daftar_brand_pilihan, key="rekap_brand"
       )
 
-    # Filter berdasarkan Zona terlebih dahulu
     if pilih_zona != "Semua Zona":
       df_filtered_zona = df_rekap_data[df_rekap_data["Zona"] == pilih_zona]
     else:
       df_filtered_zona = df_rekap_data.copy()
 
-    # Filter berdasarkan Brand selanjutnya
     if pilih_brand != "Semua Brand":
       df_filtered_brand = df_filtered_zona[
           df_filtered_zona["Brand"] == pilih_brand
@@ -949,6 +968,7 @@ else:
               beli_ada + beli_ks_tb + beli_ks_b + tba_aktif + tba_pasif + kosong
           )
           total_omset = df_hari["Omset (Bungkus)"].sum()
+          total_setoran = df_hari["Jumlah Setoran (Rp)"].sum()
           total_outlet_beli = beli_ada + beli_ks_tb + beli_ks_b
           avg_dropsize = (
               round(total_omset / total_outlet_beli, 1)
@@ -1010,6 +1030,7 @@ else:
               "TBA Pasif": tba_pasif,
               "Kosong": kosong,
               "Total Omset": total_omset,
+              "Jumlah Setoran (Rp)": total_setoran,
               "Average Dropsize": avg_dropsize,
               "% Availability Sebelum": f"{avail_sebelum}%",
               "% Availability Sesudah": f"{avail_sesudah}%",
@@ -1034,6 +1055,7 @@ else:
               "TBA Pasif": 0,
               "Kosong": 0,
               "Total Omset": 0,
+              "Jumlah Setoran (Rp)": 0,
               "Average Dropsize": 0.0,
               "% Availability Sebelum": "0.0%",
               "% Availability Sesudah": "0.0%",
@@ -1134,6 +1156,11 @@ else:
       sukses = 0
 
       for i, row in df_lokal.iterrows():
+        val_setoran_bk = (
+            int(row["Jumlah Setoran (Rp)"])
+            if "Jumlah Setoran (Rp)" in row and pd.notnull(row["Jumlah Setoran (Rp)"])
+            else 0
+        )
         payload_manual = {
             "id": int(row["ID"]),
             "tanggal": str(row["Tanggal"]),
@@ -1157,6 +1184,7 @@ else:
             "jumlah_rokok_sampling": int(row["Jumlah Rokok Sampling"]),
             "jumlah_konsumen_trial": int(row["Jumlah Konsumen Trial"]),
             "direct_selling": int(row["Direct Selling"]),
+            "jumlah_setoran": val_setoran_bk,
             "waktu_submit": str(row["Waktu Submit"]),
         }
 
