@@ -450,6 +450,8 @@ if st.session_state["form_preview_data"] is None:
 
     # Posisi input Jumlah Setoran (Rp) ditempatkan setelah bagian Promsus & Direct Selling
     st.markdown("---")
+    st.markdown("#### 💸 Setoran")
+    
     jumlah_setoran_entry = st.number_input(
         "Jumlah Setoran (Rp)", min_value=0, step=500, value=0
     )
