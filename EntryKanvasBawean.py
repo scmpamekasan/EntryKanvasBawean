@@ -592,7 +592,7 @@ else:
           )
 
           list_brand = [
-              "D.Super 12","D.76 Apel", "D.76 Apel Royal","Black Matcha K12","Black Matcha Siro","Black Matcha Kuro","Djarum 76 Aksara,
+              "D.Super 12","D.76 Apel", "D.76 Apel Royal","Black Matcha K12","Black Matcha Siro","Black Matcha Kuro","Djarum 76 Aksara",
           ]
           idx_brand = (
               list_brand.index(row_edit["Brand"])
