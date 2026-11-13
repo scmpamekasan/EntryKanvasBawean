@@ -448,7 +448,6 @@ if st.session_state["form_preview_data"] is None:
 
     direct_selling = st.number_input("Direct Selling", min_value=0, step=1, value=0)
 
-    # Posisi input Jumlah Setoran (Rp) ditempatkan setelah bagian Promsus & Direct Selling
     st.markdown("---")
     st.markdown("#### 💸 Setoran")
     
@@ -846,17 +845,29 @@ else:
     with col_h:
       st.markdown("#### 🗑️ Hapus Data")
       opsi_hapus = st.selectbox(
-          "Pilih Data yang Dihapus:", ["Hari Ini", "Semua Data"], key="opt_hapus"
+          "Pilih Data yang Dihapus:", ["Hapus per Row (ID)", "Hari Ini", "Semua Data"], key="opt_hapus"
       )
-      if st.button("🔥 Hapus Data", type="secondary", use_container_width=True):
-        st.session_state["konfirmasi_hapus"] = True
-        st.session_state["target_hapus"] = opsi_hapus
+      
+      if opsi_hapus == "Hapus per Row (ID)":
+        id_hapus_pilihan = st.selectbox("Pilih ID Baris yang Ingin Dihapus:", df_data["ID"].tolist(), key="select_id_hapus")
+        if st.button("🔥 Hapus Baris Terpilih", type="secondary", use_container_width=True):
+          st.session_state["konfirmasi_hapus"] = True
+          st.session_state["target_hapus"] = "Row"
+          st.session_state["val_hapus_row"] = id_hapus_pilihan
+      else:
+        if st.button("🔥 Hapus Data", type="secondary", use_container_width=True):
+          st.session_state["konfirmasi_hapus"] = True
+          st.session_state["target_hapus"] = opsi_hapus
 
     if st.session_state.get("konfirmasi_hapus", False):
-      st.warning(
-          "⚠️ Anda akan menghapus data kategori:"
-          f" **{st.session_state['target_hapus']}** secara permanen."
-      )
+      if st.session_state["target_hapus"] == "Row":
+        st.warning(f"⚠️ Anda akan menghapus data dengan **ID #{st.session_state['val_hapus_row']}** secara permanen.")
+      else:
+        st.warning(
+            "⚠️ Anda akan menghapus data kategori:"
+            f" **{st.session_state['target_hapus']}** secara permanen."
+        )
+      
       password_admin = st.text_input(
           "Masukkan Password Konfirmasi Hapus:", type="password"
       )
@@ -870,7 +881,9 @@ else:
           if password_admin == "admin123":
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
-            if st.session_state["target_hapus"] == "Hari Ini":
+            if st.session_state["target_hapus"] == "Row":
+              cursor.execute("DELETE FROM kanvas WHERE id = ?", (st.session_state["val_hapus_row"],))
+            elif st.session_state["target_hapus"] == "Hari Ini":
               cursor.execute("DELETE FROM kanvas WHERE tanggal = ?", (hari_ini,))
             else:
               cursor.execute("DELETE FROM kanvas")
